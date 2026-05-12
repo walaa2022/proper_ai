@@ -4,16 +4,41 @@ import { useEffect } from 'react';
 
 export default function N8NChatWidget() {
   useEffect(() => {
-    const removeOldGoldButton = () => {
-      const allButtons = Array.from(document.querySelectorAll('button'));
+    const OLD_FLOATING_BUTTON_SELECTORS = [
+      'footer[aria-label*="Real estate"] > button',
+      'footer[aria-label*="open to everyone"] > button',
+      'button[aria-label*="Real estate"]',
+      'button[aria-label*="open to everyone"]',
+    ];
 
-      allButtons.forEach((button) => {
+    const isN8NElement = (element: Element) => {
+      return Boolean(
+        element.closest('#n8n-chat') ||
+          element.closest('.n8n-chat') ||
+          element.closest('.n8n-chat-window') ||
+          element.closest('.n8n-chat-toggle') ||
+          element.closest('[class*="n8n"]')
+      );
+    };
+
+    const removeOldGoldButton = () => {
+      document
+        .querySelectorAll(OLD_FLOATING_BUTTON_SELECTORS.join(','))
+        .forEach((element) => {
+          if (!isN8NElement(element)) {
+            element.remove();
+          }
+        });
+
+      document.querySelectorAll('button').forEach((button) => {
+        if (isN8NElement(button)) return;
+
         const style = button.getAttribute('style') || '';
-        const aria = button.getAttribute('aria-label') || '';
+        const parentAria = button.parentElement?.getAttribute('aria-label') || '';
 
         const isOldGoldButton =
-          aria.includes('Real estate') ||
-          aria.includes('open to everyone') ||
+          parentAria.includes('Real estate') ||
+          parentAria.includes('open to everyone') ||
           style.includes('accent-gold') ||
           (
             style.includes('position: fixed') &&
@@ -40,7 +65,27 @@ export default function N8NChatWidget() {
       subtree: true,
     });
 
-    
+    const hideOldButtonStyleId = 'hide-old-gold-chat-button';
+
+    if (!document.getElementById(hideOldButtonStyleId)) {
+      const style = document.createElement('style');
+      style.id = hideOldButtonStyleId;
+      style.innerHTML = `
+        footer[aria-label*="Real estate"] > button,
+        footer[aria-label*="open to everyone"] > button,
+        button[style*="accent-gold"] {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+          width: 0 !important;
+          height: 0 !important;
+          overflow: hidden !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     const styleId = 'n8n-chat-style';
     const scriptId = 'n8n-chat-script';
 
@@ -84,7 +129,6 @@ export default function N8NChatWidget() {
 
     return () => {
       observer.disconnect();
-      oldButtonObserver.disconnect();
     };
   }, []);
 
