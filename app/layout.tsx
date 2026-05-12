@@ -1,7 +1,7 @@
 
 
 import { LanguageProvider } from '@/context/LanguageContext';
-import ChatWidget from '@/components/ChatWidget';
+import N8NChatWidget from "./components/N8NChatWidget";
 import './globals.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -10,8 +10,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <LanguageProvider>
           {children}
-          <ChatWidget />
-        </LanguageProvider>
+            <YourExistingWebsite />
+            <N8NChatWidget />
+       </LanguageProvider>
       </body>
     </html>
   );
